@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Analyze Customer Reviews</h1>
+<p>Select an option to enter text manually or upload a CSV file with a <b>review</b> column.</p>
+
+<div class="option-selector">
+    <input type="radio" name="input_option" id="manual_option" value="manual" checked>
+    <label for="manual_option">Enter Text</label>
+    <input type="radio" name="input_option" id="csv_option" value="csv">
+    <label for="csv_option">Upload CSV</label>
+</div>
+
+<!-- Text Input -->
+<div class="input-section" id="manual_input">
+    <h3>🔹 Enter Text</h3>
+    <form method="POST" action="/">
+        <textarea name="user_input" placeholder="Enter one or more reviews (each on a new line)..."></textarea>
+        <br><br>
+        <button type="submit">Analyze</button>
+    </form>
+</div>
+
+<!-- File Upload -->
+<div class="upload-section" id="csv_input" style="display: none;">
+    <h3>📂 Upload CSV File</h3>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv">
+        <br><br>
+        <button type="submit">Upload & Analyze</button>
+    </form>
+    <p class="note">⚠️ CSV must have a column named <b>review</b>.</p>
+</div>
+
+{% if results %}
+    <h2>📊 Analysis Results</h2>
+    <table>
+        <tr>
+            <th>Original Text</th>
+            <th>Sentiment</th>
+            <th>Confidence</th>
+        </tr>
+        {% for r in results %}
+        <tr>
+            <td>{{ r.original_text }}</td>
+            <td>{{ r.sentiment }}</td>
+            <td>{{ r.confidence }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    {% if chart %}
+        <h2>Sentiment Distribution</h2>
+        <img src="{{ url_for('static', filename=chart) }}" alt="Chart" style="max-width:100%;">
+    {% endif %}
+{% endif %}
+
+<script>
+    const manualOption = document.getElementById('manual_option');
+    const csvOption = document.getElementById('csv_option');
+    const manualInput = document.getElementById('manual_input');
+    const csvInput = document.getElementById('csv_input');
+
+    manualOption.addEventListener('change', () => {
+        if (manualOption.checked) {
+            manualInput.style.display = 'block';
+            csvInput.style.display = 'none';
+        }
+    });
+
+    csvOption.addEventListener('change', () => {
+        if (csvOption.checked) {
+            manualInput.style.display = 'none';
+            csvInput.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %}
